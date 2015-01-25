@@ -1,0 +1,89 @@
+---
+title: "Statistical Inference Project 2"
+author: "AVA"
+date: "Friday, January 23, 2015"
+output: pdf_document
+---
+# Part B
+## Overview
+We're going to analyze the ToothGrowth data in the R datasets package. This project explores the relationship between the tooth length and two alimentary supplements (orange juice and  Vitamin C)  and explores the impact of the two supplements at three dose levels.
+
+### 1.a. Load the ToothGrowth data
+
+```{r}
+library(datasets)
+data(ToothGrowth)
+str(ToothGrowth)
+head(ToothGrowth)
+```
+
+### 1.b. Perform some basic exploratory data analyses
+
+
+
+```{r, echo=TRUE}
+edaToothGrowth <- with(ToothGrowth, {
+    boxplot(len ~ dose, boxwex = 0.25, at = 1:3 - 0.2,
+            subset = (supp == "VC"), col = "green",
+            main = "Guinea Pigs' Tooth Growth",
+            xlab = "Vitamin C dose mg",
+            ylab = "tooth length", ylim = c(0, 35))
+    boxplot(len ~ dose, add = TRUE, boxwex = 0.25, at = 1:3 + 0.2,
+            subset = supp == "OJ", col = "orange")
+    legend(2, 9, c("Ascorbic acid", "Orange juice"),
+           fill = c("green", "orange"))
+})
+```
+
+###2. Provide a basic summary of the data.
+#### Format
+
+A data frame with 60 observations on 3 variables.
+
+[,1]     len     numeric	 Tooth length
+
+[,2]	 supp	 factor	         Supplement type (VC or OJ).
+
+[,3]	 dose	 numeric	 Dose in milligrams.
+
+```{r}
+summary(ToothGrowth)
+```
+
+### 3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.
+
+#### Description
+
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+```{r, echo=TRUE}
+supplement_dose <- with(ToothGrowth, split(len, list(supp, dose)))
+str(supplement_dose)
+
+tested <- function(x){
+        n <- length(x)
+        median <- median(x)
+        sd   <- sd(x)
+        mean <- mean(x)
+        ll <- mean - qt(0.975, n - 1)*sd/sqrt(n)        
+        ul <- mean + qt(0.975, n - 1)*sd/sqrt(n)
+        vals <- round(c(median, sd, ll, mean, ul), 2)
+        names(vals) <- c("length.median", "length.stdev", "confid.lower", "length.mean","confid.upper")
+    vals
+ }
+
+testedToothGrowth <- t( sapply(supplement_dose,tested) )
+print(testedToothGrowth)
+```
+
+The results in the upper table show that orange juice has a greater impact than Viatamin C for 0.5 mg and 1.0 mg dose levels, but not for higher dose levels (2mg). 
+
+### 4. State your conclusions and the assumptions needed for your conclusions.
+
+#### Assumption
+We assumed that orange juice and vitamin C have different impact on tooth growth.
+
+#### Conclusion
+
+Orange juice has greater impact than vitamin C on tooth growth, at lower dose levels (0.5 and 1 mg), but has no advantage at higher dose levels.
+
